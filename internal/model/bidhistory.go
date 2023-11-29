@@ -15,6 +15,15 @@ func (h History) TableName() string {
 	return global.DatabaseSetting.TablePrefix + "bidhistory"
 }
 
+func (h History) GetListByAID(db *gorm.DB) ([]*History, error) {
+	var historyList []*History
+	err := db.Where("auction_id = ? AND is_del = ?", h.AuctionID, 0).Find(&historyList).Error
+	if err != nil {
+		return nil, err
+	}
+	return historyList, nil
+}
+
 func (h History) GetLastBidHistory(db *gorm.DB) (*History, error) {
 	err := db.Where("auction_id = ? AND is_del = ?", h.AuctionID, 0).Last(&h).Error
 	if err != nil {

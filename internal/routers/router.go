@@ -13,6 +13,9 @@ func NewRouter() *gin.Engine {
 	auction := api.NewAuction()
 	r.GET("/bid/:id", auction.Get)
 	r.PUT("/bid/:id", auction.Update)
+	// BidHistory
+	history := api.NewHistory()
+	r.GET("/bidhistory/:id", history.GetBidHistoryListByAID)
 
 	return r
 }
