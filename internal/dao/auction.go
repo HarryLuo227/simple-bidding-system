@@ -17,6 +17,9 @@ func (d *Dao) UpdateAuction(id, itemId uint32, initBidPrice, latestBidPrice int)
 			ID: id,
 		},
 	}
+	history := model.History{
+		AuctionID: id,
+	}
 
 	values := make(map[string]int)
 	if itemId > 0 {
@@ -26,9 +29,6 @@ func (d *Dao) UpdateAuction(id, itemId uint32, initBidPrice, latestBidPrice int)
 		values["init_bid_price"] = initBidPrice
 	}
 	// Get Last BidPrice
-	history := model.History{
-		AuctionID: id,
-	}
 	lastBidHistory, err := history.GetLastBidHistory(d.engine)
 	if err != nil {
 		return err
@@ -41,9 +41,19 @@ func (d *Dao) UpdateAuction(id, itemId uint32, initBidPrice, latestBidPrice int)
 	tx := d.engine.Begin()
 	if err := auction.Update(tx, values); err != nil {
 		tx.Rollback()
+		tx.Commit()
 		return err
 	} else {
 		tx.Commit()
-		return nil
 	}
+
+	// If latest_bid_price in auction table updates successfully, then create new bid history.
+	if latestBidPrice > lastBidHistory.BidPrice {
+		history.BidPrice = latestBidPrice
+		if err := history.Create(d.engine); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

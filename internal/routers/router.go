@@ -12,7 +12,7 @@ func NewRouter() *gin.Engine {
 	// Auction
 	auction := api.NewAuction()
 	r.GET("/bid/:id", auction.Get)
-	r.POST("/bid/:id", auction.Update)
+	r.PUT("/bid/:id", auction.Update)
 
 	return r
 }
