@@ -18,12 +18,12 @@ func (a Auction) TableName() string {
 }
 
 // Query
-func (a Auction) Get(db *gorm.DB) error {
+func (a Auction) Get(db *gorm.DB) (*Auction, error) {
 	err := db.Where("id = ? AND is_del = ?", a.ID, 0).First(&a).Error
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &a, nil
 }
 
 // Update

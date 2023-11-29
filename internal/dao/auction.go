@@ -8,7 +8,7 @@ func (d *Dao) GetAuction(id uint32) (*model.Auction, error) {
 			ID: id,
 		},
 	}
-	return &auction, auction.Get(d.engine)
+	return auction.Get(d.engine)
 }
 
 func (d *Dao) UpdateAuction(id, itemId uint32, initBidPrice, latestBidPrice int) error {

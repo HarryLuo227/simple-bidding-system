@@ -15,6 +15,28 @@ func NewAuction() Auction {
 	return Auction{}
 }
 
+func (a Auction) Get(c *gin.Context) {
+	param := service.GetAuctionRequest{
+		ID: convert.StrTo(c.Param("id")).MustUInt32(),
+	}
+	response := app.NewResponse(c)
+	valid, errs := app.BindAndValid(c, &param)
+	if !valid {
+		log.Printf("app.BindAndValid in GetAuction err: %v", errs)
+		return
+	}
+
+	svc := service.New(c.Request.Context())
+	result, err := svc.GetAuction(&param)
+	if err != nil {
+		log.Printf("svc.UpdateAuction err: %v", err)
+		return
+	}
+
+	response.ToResponse(result)
+	return
+}
+
 func (a Auction) Update(c *gin.Context) {
 	param := service.UpdateAuctionRequest{
 		ID: convert.StrTo(c.Param("id")).MustUInt32(),
