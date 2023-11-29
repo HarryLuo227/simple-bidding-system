@@ -29,10 +29,11 @@ func (d *Dao) UpdateAuction(id, itemId uint32, initBidPrice, latestBidPrice int)
 	history := model.History{
 		AuctionID: id,
 	}
-	if err := history.GetLastBidHistory(d.engine); err != nil {
+	lastBidHistory, err := history.GetLastBidHistory(d.engine)
+	if err != nil {
 		return err
 	}
-	if latestBidPrice > history.BidPrice {
+	if latestBidPrice > lastBidHistory.BidPrice {
 		values["latest_bid_price"] = latestBidPrice
 	}
 

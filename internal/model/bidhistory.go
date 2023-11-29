@@ -8,10 +8,10 @@ type History struct {
 	BidPrice  int    `json:"bid_price"`
 }
 
-func (h History) GetLastBidHistory(db *gorm.DB) error {
+func (h History) GetLastBidHistory(db *gorm.DB) (*History, error) {
 	err := db.Where("auction_id = ? AND is_del = ?", h.AuctionID, 0).Last(&h).Error
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &h, nil
 }
