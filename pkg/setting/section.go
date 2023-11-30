@@ -5,10 +5,11 @@ import (
 )
 
 type ServerSettings struct {
-	RunMode      string
-	HttpPort     string
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
+	RunMode        string
+	HttpPort       string
+	ReadTimeout    time.Duration
+	WriteTimeout   time.Duration
+	TickerDuration time.Duration
 }
 
 type DatabaseSettings struct {

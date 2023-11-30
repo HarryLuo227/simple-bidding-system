@@ -5,11 +5,11 @@
 package main
 
 import (
-	"bytes"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/HarryLuo227/simple-bidding-system/global"
 	"github.com/gorilla/websocket"
 )
 
@@ -66,17 +66,13 @@ func (c *Client) readPump() {
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
-	for {
-		_, message, err := c.conn.ReadMessage()
-		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
-			}
-			break
-		}
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+
+	ticker := time.NewTicker(global.ServerSetting.TickerDuration)
+	for range ticker.C {
+		message := []byte("Test")
 		c.hub.broadcast <- message
 	}
+	ticker.Stop()
 }
 
 // writePump pumps messages from the hub to the websocket connection.

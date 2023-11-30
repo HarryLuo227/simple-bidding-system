@@ -18,20 +18,13 @@
             
             // Bid request
             document.getElementById("form").onsubmit = function () {
-                if (!conn || !msg.value) {
+                if (!conn) {
                     return false;
                 }
-                var response = await fetch('https://reqbin.com/echo/post/json', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ "id": 1 })
-                });
-                var json = await response.json();
-                latestPrice = JSON.stringify(json)
-                conn.send(latestPrice);
+                if (!msg.value) {
+                    return false;
+                }
+                conn.send(msg.value);
                 msg.value = "";
                 return false;
             };
@@ -46,9 +39,8 @@
                 conn.onmessage = function (evt) {
                     var messages = evt.data.split('\n');
                     for (var i = 0; i < messages.length; i++) {
-                        var item = document.getElementById("price");
+                        var item = document.getElementById("bid-info");
                         item.innerText = messages[i];
-                        // appendLog(item);
                     }
                 };
             } else {
@@ -97,9 +89,9 @@
 </head>
 <body>
 <div id="log">
-    <div>
-        <p id="price">最新價格：</p>
-    </div>
+    <p>競拍資訊</p>
+    <p>latest_bi_price = 最新價格 ; 其餘為下標更新資訊</p>
+    <div id="bid-info"></div>
 </div>
 <form id="form">
     <input type="text" id="msg" size="64" autofocus />

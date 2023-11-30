@@ -36,6 +36,7 @@ func setupSetting() error {
 	}
 	global.ServerSetting.ReadTimeout *= time.Second
 	global.ServerSetting.WriteTimeout *= time.Second
+	global.ServerSetting.TickerDuration *= time.Millisecond
 
 	err = setting.ReadSection("Database", &global.DatabaseSetting)
 	if err != nil {
