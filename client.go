@@ -5,12 +5,15 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/HarryLuo227/simple-bidding-system/global"
+	"github.com/HarryLuo227/simple-bidding-system/internal/model"
 	"github.com/gorilla/websocket"
+	"github.com/jinzhu/gorm"
 )
 
 const (
@@ -42,6 +45,11 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+type broadcast struct {
+	LatestBidPrice  int              `json:"latest_bid_price"`
+	BidHistoryOfAID []*model.History `json:"bid_history_list"`
+}
+
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 	hub *Hub
@@ -69,7 +77,11 @@ func (c *Client) readPump() {
 
 	ticker := time.NewTicker(global.ServerSetting.TickerDuration)
 	for range ticker.C {
-		message := []byte("Test")
+		broadcastContent, err := QueryDB(global.DBEngine, 1)
+		if err != nil {
+			log.Println(err)
+		}
+		message, _ := json.Marshal(broadcastContent)
 		c.hub.broadcast <- message
 	}
 	ticker.Stop()
@@ -135,4 +147,22 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	// new goroutines.
 	go client.writePump()
 	go client.readPump()
+}
+
+func QueryDB(db *gorm.DB, auctionID uint32) (*broadcast, error) {
+	var result broadcast
+
+	var auction model.Auction
+	if err := db.Where("id = ?", auctionID).First(&auction).Error; err != nil {
+		return nil, err
+	}
+
+	var historys []*model.History
+	if err := db.Where("auction_id = ?", auctionID).Find(&historys).Error; err != nil {
+		return nil, err
+	}
+
+	result.LatestBidPrice = auction.LatestBidPrice
+	result.BidHistoryOfAID = historys
+	return &result, nil
 }
