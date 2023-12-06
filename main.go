@@ -10,6 +10,9 @@ import (
 	"github.com/HarryLuo227/simple-bidding-system/internal/routers"
 	"github.com/HarryLuo227/simple-bidding-system/pkg/setting"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redsync/redsync/v4"
+	"github.com/go-redsync/redsync/v4/redis/goredis/v9"
+	goredislib "github.com/redis/go-redis/v9"
 )
 
 func init() {
@@ -22,6 +25,8 @@ func init() {
 	if err != nil {
 		log.Fatalf("init.setupDBEngine err: %v", err)
 	}
+
+	setupRedis()
 }
 
 func setupSetting() error {
@@ -53,6 +58,14 @@ func setupDBEngine() error {
 		return err
 	}
 	return nil
+}
+
+func setupRedis() {
+	client := goredislib.NewClient(&goredislib.Options{
+		Addr: "localhost:6379",
+	})
+	pool := goredis.NewPool(client)
+	global.RedisSync = redsync.New(pool)
 }
 
 func serveHome(c *gin.Context) {

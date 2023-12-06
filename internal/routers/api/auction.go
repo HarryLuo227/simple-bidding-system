@@ -3,6 +3,7 @@ package api
 import (
 	"log"
 
+	"github.com/HarryLuo227/simple-bidding-system/global"
 	"github.com/HarryLuo227/simple-bidding-system/internal/service"
 	"github.com/HarryLuo227/simple-bidding-system/pkg/app"
 	"github.com/HarryLuo227/simple-bidding-system/pkg/convert"
@@ -49,10 +50,28 @@ func (a Auction) Update(c *gin.Context) {
 	}
 
 	svc := service.New(c.Request.Context())
+	mutexname := "bid-distributed-lock"
+	mutex := global.RedisSync.NewMutex(mutexname)
+	// Obtain a lock for our given mutex. After this is successful, no one else
+	// can obtain the same lock (the same mutex name) until we unlock it.
+	if err := mutex.Lock(); err != nil {
+		log.Println("Distributed lock Has already locked by some one")
+		log.Println(&param)
+		panic(err)
+	}
+	log.Println("Locked")
+	log.Println(&param)
+
 	if err := svc.UpdateAuction(&param); err != nil {
 		log.Printf("svc.UpdateAuction err: %v", err)
 		return
 	}
+
+	// Release the lock so other processes or threads can obtain a lock.
+	if ok, err := mutex.Unlock(); !ok || err != nil {
+		panic("unlock failed")
+	}
+	log.Println("Unlocked")
 
 	response.ToResponse("Succeeded")
 	return
