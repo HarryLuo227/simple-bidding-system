@@ -2,6 +2,9 @@
 
 This is a project for a test before interview.
 
+> [!NOTE]  
+> Add using redis distributed lock to prevent race condition, but the test is not intact.
+
 ## Database
 
 There are three tables used in this simple-bidding-system, shop_item for merchandise, shop_auction for auction of Lots and shop_bidhistory for history of every successful bid.
